@@ -38,6 +38,7 @@ class _RegisterPageState extends State<RegisterPage> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
+                  SizedBox(height: 55,),
                   CircleAvatar(radius: 70, backgroundImage: AssetImage(kLogo)),
 
                   SizedBox(height: 30),
