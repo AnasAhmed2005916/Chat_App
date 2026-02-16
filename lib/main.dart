@@ -1,10 +1,15 @@
 import 'package:chat_app/firebase_options.dart';
 import 'package:chat_app/pages/chat_page.dart';
+import 'package:chat_app/pages/cubits/chat%20cubit/chat_cubit.dart';
+import 'package:chat_app/pages/cubits/eye%20cubit/eye_cubit.dart';
+import 'package:chat_app/pages/cubits/login%20cubit/login_cubit.dart';
+import 'package:chat_app/pages/cubits/register%20cubit/register_cubit.dart';
 import 'package:chat_app/pages/login_page.dart';
 import 'package:chat_app/pages/register_page.dart';
 import 'package:device_preview/device_preview.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -15,14 +20,22 @@ void main() async {
 class ScholarChat extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      routes: {
-        'LoginPage': (context) => LoginPage(),
-        'RegisterPage': (context) => RegisterPage(),
-        'Chat': (context) =>ChatPage(),
-      },
-      debugShowCheckedModeBanner: false, // home: loginPage();
-      initialRoute: 'LoginPage',
+    return MultiBlocProvider(
+      providers: [
+        BlocProvider(create: (context) => LoginCubit()),
+        BlocProvider(create: (context) => RegisterCubit()),
+        BlocProvider(create: (context) => ChatCubit()),
+        BlocProvider(create: (context) => EyeCubit()),
+      ],
+      child: MaterialApp(
+        routes: {
+          'LoginPage': (context) => LoginPage(),
+          'RegisterPage': (context) => RegisterPage(),
+          'Chat': (context) => ChatPage(),
+        },
+        debugShowCheckedModeBanner: false, // home: loginPage();
+        initialRoute: 'LoginPage',
+      ),
     );
   }
 }

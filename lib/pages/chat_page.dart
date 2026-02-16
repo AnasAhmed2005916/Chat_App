@@ -58,7 +58,8 @@ class _ChatPageState extends State<ChatPage> {
               title: Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  Image.asset(kLogo, height: 70),
+                  Icon(Icons.chat_outlined, size: 40),
+                  SizedBox(width: 20),
                   Text(
                     'Chat Page',
                     style: TextStyle(
@@ -128,8 +129,7 @@ class _ChatPageState extends State<ChatPage> {
 }
 
 void fixOldMessages() async {
-  final messages =
-      FirebaseFirestore.instance.collection(kMessagesCollections);
+  final messages = FirebaseFirestore.instance.collection(kMessagesCollections);
 
   final snapshot = await messages.get();
 
@@ -141,4 +141,3 @@ void fixOldMessages() async {
     }
   }
 }
-

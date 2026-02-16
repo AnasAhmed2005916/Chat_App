@@ -1,10 +1,13 @@
 import 'package:chat_app/constants.dart';
 import 'package:chat_app/pages/chat_page.dart';
+import 'package:chat_app/pages/cubits/register%20cubit/register_cubit.dart';
+import 'package:chat_app/pages/cubits/register%20cubit/register_state.dart';
 import 'package:chat_app/pages/login_page.dart';
 import 'package:chat_app/widgets/custom_button.dart';
 import 'package:chat_app/widgets/custom_text_field.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:modal_progress_hud_nsn/modal_progress_hud_nsn.dart';
 
 class RegisterPage extends StatefulWidget {
@@ -16,132 +19,102 @@ class RegisterPage extends StatefulWidget {
 
 class _RegisterPageState extends State<RegisterPage> {
   // static => you can access by the class
-  String? email;
-
-  String? password;
-
+  TextEditingController email = TextEditingController();
+  TextEditingController pass = TextEditingController();
   bool isLoading = false;
 
   GlobalKey<FormState> formkey = GlobalKey();
   // create a key => used in form
   @override
   Widget build(BuildContext context) {
-    return ModalProgressHUD(
-      inAsyncCall: isLoading,
-      child: Scaffold(
-        backgroundColor: kPrimaryColor,
-        body: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 8),
-          child: SingleChildScrollView(
-            child: Form(
-              key: formkey,
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.center,
-                children: [
-                  SizedBox(height: 55,),
-                  CircleAvatar(radius: 70, backgroundImage: AssetImage(kLogo)),
-
-                  SizedBox(height: 30),
-                  Align(
-                    alignment: Alignment.bottomLeft,
-                    child: Text(
-                      textAlign: TextAlign.left,
-                      ' REGISTER',
-                      style: TextStyle(fontSize: 32, color: Colors.white),
+    return BlocConsumer<RegisterCubit, RegisterState>(
+      listener: (context, state) {
+        if (state is RegisterSuccess) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(backgroundColor: Colors.green, content: Text('Success')),
+          );
+          Navigator.pushNamed(context, ChatPage.id, arguments: email.text);
+        } else if (state is RegisterFailure) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              backgroundColor: Colors.red,
+              content: Text(state.errorMsg),
+            ),
+          );
+        }
+      },
+      builder: (context, state) {
+        return Scaffold(
+          backgroundColor: kPrimaryColor,
+          body: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 8),
+            child: SingleChildScrollView(
+              child: Form(
+                key: formkey,
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  children: [
+                    SizedBox(height: 55),
+                    CircleAvatar(
+                      radius: 70,
+                      backgroundImage: AssetImage(kLogo),
                     ),
-                  ),
-                  SizedBox(height: 15),
-                  CustomTextField(
-                    hintText: 'Email',
-                    onChanged: (data) {
-                      email = data;
-                    },
-                  ),
-                  SizedBox(height: 20),
-                  CustomTextField(
-                    hintText: 'Password',
-                    onChanged: (data) {
-                      password = data;
-                    },
-                    obsecureText: true,
-                  ),
-                  SizedBox(height: 50),
-                  CustomButton(
-                    onTap: () async {
-                      if (formkey.currentState!.validate()) {
-                        setState(() {
-                          isLoading = true;
-                        });
-                        try {
-                          await RegisterUser(context);
-                          Navigator.pushNamed(context, ChatPage.id);
-                        } on FirebaseAuthException catch (error) {
-                          showSnackBarFromFirebase(context, error);
-                        } catch (error) {
-                          ShowSnackBar(context, error);
-                        }
-                        setState(() {
-                          isLoading = false;
-                        });
-                      } else {
-                        print('Error message');
-                      }
-                    },
-                    text: 'REGISTER',
-                  ),
 
-                  SizedBox(height: 15),
-                  InkWell(
-                    onTap: () {
-                      Navigator.pop(context);
-                    },
-                    child: Text.rich(
-                      TextSpan(
-                        children: [
-                          TextSpan(
-                            text: 'already have an account?',
-                            style: TextStyle(color: Colors.white),
-                          ),
-                          TextSpan(
-                            text: 'LOGIN',
-                            style: TextStyle(color: Colors.white),
-                          ),
-                        ],
+                    SizedBox(height: 30),
+                    Align(
+                      alignment: Alignment.bottomLeft,
+                      child: Text(
+                        textAlign: TextAlign.left,
+                        ' REGISTER',
+                        style: TextStyle(fontSize: 32, color: Colors.white),
                       ),
                     ),
-                  ),
-                ],
+                    SizedBox(height: 15),
+                    CustomTextField(hintText: 'Email', controller: email),
+                    SizedBox(height: 20),
+                    CustomTextField(
+                      hintText: 'Password',
+                      obsecureText: true,
+                      controller: pass,
+                    ),
+                    SizedBox(height: 50),
+                    CustomButton(
+                      onTap: () async {
+                        context.read<RegisterCubit>().RegisterUser(
+                          email: email.text,
+                          pass: pass.text,
+                        );
+                      },
+                      text: 'REGISTER',
+                    ),
+
+                    SizedBox(height: 15),
+                    InkWell(
+                      onTap: () {
+                        Navigator.pop(context);
+                      },
+                      child: Text.rich(
+                        TextSpan(
+                          children: [
+                            TextSpan(
+                              text: 'already have an account?',
+                              style: TextStyle(color: Colors.white),
+                            ),
+                            TextSpan(
+                              text: 'LOGIN',
+                              style: TextStyle(color: Colors.white),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
               ),
             ),
           ),
-        ),
-      ),
-    );
-  }
-
-  void ShowSnackBar(BuildContext context, Object error) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(backgroundColor: Colors.red, content: Text('$error')),
-    );
-  }
-
-  void showSnackBarFromFirebase(
-    BuildContext context,
-    FirebaseAuthException error,
-  ) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        backgroundColor: Colors.red,
-        content: Text('Error: ${error.code}'),
-      ),
-    );
-  }
-
-  Future<void> RegisterUser(BuildContext context) async {
-    final credential = await FirebaseAuth.instance
-        .createUserWithEmailAndPassword(email: email!, password: password!);
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(backgroundColor: Colors.green, content: Text('Success')),
+        );
+      },
     );
   }
 }
