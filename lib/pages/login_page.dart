@@ -1,5 +1,6 @@
 import 'package:chat_app/constants.dart';
 import 'package:chat_app/pages/chat_page.dart';
+import 'package:chat_app/pages/cubits/chat%20cubit/chat_cubit.dart';
 import 'package:chat_app/pages/cubits/login%20cubit/login_cubit.dart';
 import 'package:chat_app/pages/cubits/login%20cubit/login_state.dart';
 import 'package:chat_app/pages/register_page.dart';
@@ -30,6 +31,9 @@ class LoginPage extends StatelessWidget {
                 content: Text('Success Login'),
               ),
             );
+            context
+                .read<ChatCubit>()
+                .getMessages(); // get all messages before navigate to chat page
             Navigator.pushNamed(context, ChatPage.id, arguments: email.text);
           } else if (state is LoginFailure) {
             ScaffoldMessenger.of(context).showSnackBar(
